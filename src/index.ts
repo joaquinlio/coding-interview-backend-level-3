@@ -1,8 +1,8 @@
-import { initializeServer, startServer } from "./server"
+import { startServer } from "./server";
+import { initializeDatabase } from "./utils/db.util";
 
-process.on('unhandledRejection', (err) => {
-    console.error(err)
-    process.exit(1)
-})
-
-await startServer()
+initializeDatabase().then(() => {
+  startServer().catch((error) => {
+    console.error("Error starting server:", error);
+  });
+});

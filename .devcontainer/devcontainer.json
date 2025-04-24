@@ -1,8 +1,9 @@
 // See https://containers.dev/implementors/json_reference/ for configuration reference
 {
-	"name": "Coding Interview Backend Level 3",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-  "remoteUser": "node"
+  "name": "Coding Interview Backend Level 3",
+  "remoteUser": "node",
+  "dockerComposeFile": ["docker-compose.yml"],
+  "service": "dev",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [3000, 5432, 5433]
 }

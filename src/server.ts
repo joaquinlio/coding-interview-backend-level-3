@@ -1,26 +1,40 @@
-import Hapi from '@hapi/hapi'
-import { defineRoutes } from './routes'
+import { server as hapiServer } from "@hapi/hapi";
+import { ItemRepository } from "./repositories/item.repository";
+import { ItemService } from "./services/item.service";
+import { ItemController } from "./controllers/item.controller";
+import { registerItemRoutes } from "./routes/item.routes";
+import { registerPingRoutes } from "./routes/ping.routes";
+import pool from "./utils/db.util";
 
-const getServer = () => {
-    const server = Hapi.server({
-        host: 'localhost',
-        port: 3000,
-    })
+const getServer = async () => {
+  const server = hapiServer({
+    host: "localhost",
+    port: 3000,
+  });
 
-    defineRoutes(server)
+  // Initialize repository, service, and controller
+  const repository = new ItemRepository();
+  const service = new ItemService(repository);
+  const controller = new ItemController(service);
 
-    return server
-}
+  // Register routes
+  registerItemRoutes(server, controller);
+  registerPingRoutes(server);
+
+  return server;
+};
 
 export const initializeServer = async () => {
-    const server = getServer()
-    await server.initialize()
-    return server
-}
+  // Clean up the database before starting the server
+  await pool.query("TRUNCATE TABLE items RESTART IDENTITY CASCADE");
+  const server = await getServer();
+  await server.initialize();
+  return server;
+};
 
 export const startServer = async () => {
-    const server = getServer()
-    await server.start()
-    console.log(`Server running on ${server.info.uri}`)
-    return server
+  const server = await getServer();
+  await server.start();
+  console.log(`Server running on ${server.info.uri}`);
+  return server;
 };
